@@ -5,7 +5,9 @@ class SystemTimeFormat
     self.class.instance_eval do
       define_method("get_#{pf}") do
         ps_class_name = pf.split('_').collect!(&:capitalize).join
-        windows_date_patorn = get_system_short_date_format(ps_class_name)[0].gsub(/[\s+\uFEFF]$/, '')
+        windows_date_patorn = get_system_date_format(ps_class_name)
+        raise RuntimeError,windows_date_patorn[1] unless windows_date_patorn[2].success?
+        windows_date_patorn = windows_date_patorn[0].gsub(/[\s+\uFEFF]$/, '')
         conver_system_date_to_ruby_date_format windows_date_patorn
         windows_date_patorn
       end
@@ -35,7 +37,7 @@ class SystemTimeFormat
     windows_date_patorn.sub!("Z", "%Z")
   end
 
-  def self.get_system_short_date_format(powershell_function)
+  def self.get_system_date_format(powershell_function)
     Open3.capture3('powershell [Globalization.Cultureinfo]::CurrentCulture.DateTimeFormat.' + powershell_function)
   end
 end
